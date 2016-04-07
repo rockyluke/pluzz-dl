@@ -9,4 +9,4 @@ addons:
     - shellcheck
 
 script:
- - shellcheck *.sh
+ - shellcheck -e 2045,2046,2086 pluzz-dl

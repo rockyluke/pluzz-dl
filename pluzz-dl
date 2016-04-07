@@ -14,7 +14,7 @@
 # OTHER  TORTIOUS ACTION,  ARISING  OUT OF  OR  IN CONNECTION  WITH  THE USE  OR
 # PERFORMANCE OF THIS SOFTWARE.
 
-version='0.9'
+version='1.9'
 quality='3'
 
 # awk
@@ -41,7 +41,7 @@ then
     exit 1
 fi
 
-function usage {
+usage() {
 
     cat <<EOF
 
@@ -63,7 +63,7 @@ EOF
 } # usage
 
 
-function getName {
+getName() {
 
     url=${1}
 
@@ -73,7 +73,7 @@ function getName {
 } # getName
 
 
-function getId {
+getId() {
 
     url=${1}
 
@@ -83,7 +83,7 @@ function getId {
 } # getId
 
 
-function getMaster {
+getMaster() {
 
     id=${1}
     url="http://webservices.francetelevisions.fr/tools/getInfosOeuvre/v2/?idDiffusion=${id}&catalogue=Pluzz"
@@ -94,7 +94,7 @@ function getMaster {
 } # getMaster
 
 
-function getIndex {
+getIndex() {
 
     url=${1}
     quality=${2}
@@ -105,7 +105,7 @@ function getIndex {
 } # getIndex
 
 
-function getFiles {
+getFiles() {
 
     url=${1}
 
@@ -115,7 +115,7 @@ function getFiles {
 } # getFiles
 
 
-function downloadPart {
+downloadPart() {
 
     files=${*}
 
@@ -135,7 +135,7 @@ function downloadPart {
 } # downloadFiles
 
 
-function generateFile {
+generateFile() {
 
     name=${*}
 
