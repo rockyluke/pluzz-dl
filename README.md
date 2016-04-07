@@ -2,9 +2,9 @@
 
 ## Overview
 
-"Pluzz est  le service  de télévision  de rattrapage  de France  Télévisions qui
+Pluzz  est le  service de  télévision de  rattrapage de  France Télévisions  qui
 permet de  voir ou revoir  les émissions des  différentes chaînes du  groupe via
-internet, jusqu'à une semaine après leur diffusion."
+internet, jusqu'à une semaine après leur diffusion.
 
 ## Description
 
