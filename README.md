@@ -8,6 +8,8 @@ internet, jusqu'à une semaine après leur diffusion."
 
 ## Description
 
+Small command-line program to download videos from Pluzz.
+
 ## Requirements
 
 ```bash
@@ -34,10 +36,6 @@ Feel free to contribute on GitHub.
   ╚═(███)═╝
    ╚═(███)═╝
 ```
-
-- [developer.apple.com/opensource](https://developer.apple.com/opensource/)
-- [github.com/apple](https://github.com/apple)
-- [www.apple.com/opensource](https://www.apple.com/opensource/)
 
 [license-img]: https://img.shields.io/badge/license-ISC-blue.svg
 [build-img]: https://travis-ci.org/rockyluke/pluzz-dl.svg?branch=master
