@@ -1,0 +1,209 @@
+#!/bin/bash
+
+# Copyright (c) 2016, rockyluke <rockyluke@offline.net>
+#
+# Permission  to use,  copy, modify,  and/or  distribute this  software for  any
+# purpose  with  or without  fee  is hereby  granted,  provided  that the  above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS"  AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+# REGARD TO  THIS SOFTWARE INCLUDING  ALL IMPLIED WARRANTIES  OF MERCHANTABILITY
+# AND FITNESS.  IN NO EVENT SHALL  THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+# INDIRECT, OR  CONSEQUENTIAL DAMAGES OR  ANY DAMAGES WHATSOEVER  RESULTING FROM
+# LOSS OF USE, DATA OR PROFITS,  WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+# OTHER  TORTIOUS ACTION,  ARISING  OUT OF  OR  IN CONNECTION  WITH  THE USE  OR
+# PERFORMANCE OF THIS SOFTWARE.
+
+version='0.9'
+quality='3'
+
+# awk
+which awk > /dev/null
+if [ ${?} -ne 0 ]
+then
+    echo "Please install awk (see README.md)"
+    exit 1
+fi
+
+# curl
+which curl > /dev/null
+if [ ${?} -ne 0 ]
+then
+    echo "Please install curl (see README.md)"
+    exit 1
+fi
+
+# wget
+which wget > /dev/null
+if [ ${?} -ne 0 ]
+then
+    echo "Please install wget (see README.md)"
+    exit 1
+fi
+
+function usage {
+
+    cat <<EOF
+
+NAME:
+   pluzz-dl - Download video from Pluzz
+
+USAGE:
+   pluzz-dl [OPTIONS] URL
+
+OPTIONS:
+   -h                  Show help
+   -q                  Video quality (low, medium or high)
+
+VERSION:
+   pluzz-dl version: ${version}
+
+EOF
+
+} # usage
+
+
+function getName {
+
+    url=${1}
+
+    name=$(curl -s "${url}" | awk -F\" '/^<meta name="og:title" content="/ {print $4}' | sed s/' | Vidéo en streaming sur francetv pluzz'// | tr ':' '-')
+    echo "${name}"
+
+} # getName
+
+
+function getId {
+
+    url=${1}
+
+    id=$(curl -s "${url}" | awk -F\" '/^<meta name="id_video" content="/ {print $4}')
+    echo "${id}"
+
+} # getId
+
+
+function getMaster {
+
+    id=${1}
+    url="http://webservices.francetelevisions.fr/tools/getInfosOeuvre/v2/?idDiffusion=${id}&catalogue=Pluzz"
+
+    master=$(curl -s "${url}" | awk -F\" 'BEGIN {RS="{"}; /^"format":"m3u8-download"/ {gsub("\\\\","",$8); print $8;}')
+    echo "${master}"
+
+} # getMaster
+
+
+function getIndex {
+
+    url=${1}
+    quality=${2}
+
+    index=$(curl -s "${url}" | grep "index_${quality}_av.m3u8" | sed s/'?null=0'//)
+    echo "${index}"
+
+} # getIndex
+
+
+function getFiles {
+
+    url=${1}
+
+    files=$(curl -s "${url}" | grep 'http://' | sed s/'?null=0'//)
+    echo "${files}"
+
+} # getFiles
+
+
+function downloadPart {
+
+    files=${*}
+
+    echo -n 'Downloading video segment'
+    for file in ${files}
+    do
+	wget -q "${file}"
+	echo -n '.'
+    done
+    echo ' done.'
+
+    for segment in $(ls segment*.ts)
+    do
+	mv "${segment}" part_$(printf %03d ${segment:7:-8}).ts
+    done
+
+} # downloadFiles
+
+
+function generateFile {
+
+    name=${*}
+
+    if [ -f "${name}.avi" ]
+    then
+	rm "${name}.avi"
+    fi
+
+    for part in $(ls part_*.ts)
+    do
+	cat "${part}" >> video.avi
+	rm "${part}"
+    done
+
+    mv video.avi "${name}.avi"
+
+} # generateFile
+
+
+while getopts ':hq:u:' OPTIONS
+do
+    case ${OPTIONS} in
+	h)
+	    usage
+	    exit 0
+	    ;;
+	q)
+	    case ${OPTARG} in
+		low)
+		    quality=1
+		    ;;
+		medium)
+		    quality=2
+		    ;;
+		high)
+		    quality=3
+		    ;;
+		*)
+		    usage
+		    exit 1
+		    ;;
+	    esac
+	    ;;
+	u)
+	    url=${OPTARG}
+	    ;;
+	*)
+	    usage
+	    exit 1
+	    ;;
+    esac
+done
+
+if [ $# -eq 0 ]
+then
+    usage
+    exit 1
+else
+    url="${*:-1}"
+
+    name=$(getName "${url}")
+    id=$(getId "${url}")
+    master=$(getMaster "${id}")
+    index=$(getIndex "${master}" "${quality}")
+    files=$(getFiles "${index}")
+
+    downloadPart "${files}"
+    generateFile "${name}"
+    exit 0
+fi
+# EOF
