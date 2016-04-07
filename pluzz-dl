@@ -140,7 +140,7 @@ generateFile() {
     fi
 
     # From https://github.com/marcjoos/dpluzz
-    for file in $(ls *.ts)
+    for file in $(ls ./*.ts)
     do
 	mv "${file}" part_$(printf %03d ${file:7:-8}).ts
     done
