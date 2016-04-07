@@ -14,7 +14,7 @@
 # OTHER  TORTIOUS ACTION,  ARISING  OUT OF  OR  IN CONNECTION  WITH  THE USE  OR
 # PERFORMANCE OF THIS SOFTWARE.
 
-version='1.9'
+version='1.1'
 quality='3'
 
 # awk
@@ -127,11 +127,6 @@ downloadPart() {
     done
     echo ' done.'
 
-    for segment in $(ls segment*.ts)
-    do
-	mv "${segment}" part_$(printf %03d ${segment:7:-8}).ts
-    done
-
 } # downloadFiles
 
 
@@ -144,10 +139,18 @@ generateFile() {
 	rm "${name}.avi"
     fi
 
-    for part in $(ls part_*.ts)
+    # From https://github.com/marcjoos/dpluzz
+    for file in $(ls *.ts)
     do
-	cat "${part}" >> video.avi
-	rm "${part}"
+	mv "${file}" part_$(printf %03d ${file:7:-8}).ts
+    done
+
+    unset file
+
+    for file in $(ls part_*.ts)
+    do
+	cat "${file}" >> video.avi
+	rm "${file}"
     done
 
     mv video.avi "${name}.avi"
